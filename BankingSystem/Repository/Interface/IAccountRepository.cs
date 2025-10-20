@@ -8,6 +8,8 @@ namespace BankingSystem.Repository.Interface
         Task<Account?> GetByIdAsync(Guid id);
         Task<Account?> GetByAccountNumberAsync(string accountNumber);
         Task<IEnumerable<Account>> GetByUserIdAsync(Guid userId);
+        Task<bool> RemoveAccountAsync(Guid userId);
+        Task<bool> CloseAccountAsync(Guid accountId);
         Task UpdateBalanceAsync(Guid accountId, decimal newBalance);
     }
 }

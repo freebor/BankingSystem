@@ -40,10 +40,23 @@ namespace BankingSystem.Repository.Repo
             return await _db.QueryAsync<Account>(sql, new {UserId = userId});
         }
 
+        public async Task<bool> RemoveAccountAsync(Guid userId)
+        {
+            var sql = "DELETE FROM Accounts WHERE Id = @Id";
+            var affectedRow = await _db.ExecuteAsync(sql, new {Id = userId});
+            return affectedRow > 0;
+        }
         public async Task UpdateBalanceAsync(Guid accountId, decimal newBalance)
         {
             var sql = "UPDATE Accounts SET Balance = @Balance  WHERE Id = @Id";
             await _db.ExecuteAsync(sql, new { Balance = newBalance, Id = accountId});
+        }
+
+        public async Task<bool> CloseAccountAsync(Guid accountId)
+        {
+            var sql = "UPDATE Accounts SET Status = 'Closed' WHERE Id = @Id";
+            var result = await _db.ExecuteAsync(sql, new { Id = accountId });
+            return result > 0;
         }
     }
 }

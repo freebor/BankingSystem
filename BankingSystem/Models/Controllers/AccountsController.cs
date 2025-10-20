@@ -18,10 +18,7 @@ namespace BankingSystem.Controllers
             _accountService = accountService;
         }
 
-
-        /// <summary>
-        /// Create a new account for a user.
-        /// </summary>
+        // Create a new account for a user.
         [HttpPost("create")]
         [Authorize(Roles = "User")]
         public async Task<IActionResult> CreateAccount([FromBody] CreateAccountDto currency)
@@ -32,10 +29,7 @@ namespace BankingSystem.Controllers
             return Ok();
         }
 
-        /// <summary>
-        /// Get account details by account Id (including transaction history).
-        /// </summary>
-        
+        // Get account details by account Id (including transaction history).
         [HttpGet("{accountId:guid}")]
         [Authorize(Roles = "Admin,User")]
         public async Task<IActionResult> GetAccountById(Guid accountId)
@@ -51,6 +45,18 @@ namespace BankingSystem.Controllers
         {
             var acc = await _accountService.GetUserAccountsAsync(userId);
             return Ok(acc);
+        }
+
+        [HttpDelete("delete/{accountId}")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> RemoveAccountById(Guid accountId)
+        {
+            var success = await _accountService.RemoveAccount(accountId);
+
+            if (!success)
+                return NotFound(new { message = "Account not found or already deleted." });
+
+            return Ok(new { message = "Account deleted successfully." });
         }
     }
 }

@@ -28,8 +28,6 @@ namespace BankingSystem
                 return new System.Data.SqlClient.SqlConnection(connectionString);
             });
 
-
-
             // 3.Register Repositories
             builder.Services.AddScoped<IAccountRepository, AccountRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
@@ -46,7 +44,9 @@ namespace BankingSystem
             builder.Services.AddScoped<IAuthService, AuthService>();
 
 
-            var jwtSecret = Environment.GetEnvironmentVariable("Jwt__SecretKey");
+            var jwtSecret = builder.Configuration["Jwt:Key"]
+                ?? Environment.GetEnvironmentVariable("Jwt__SecretKey")
+                ?? throw new InvalidOperationException("JWT Secret Key is not configured");
             builder.Services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -56,7 +56,7 @@ namespace BankingSystem
             {
                 options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
+                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -71,7 +71,11 @@ namespace BankingSystem
             // Add services to the container.
             builder.Services.AddAuthorization();
 
-            //builder.Services.AddControllers(); 
+            builder.Services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = builder.Configuration.GetConnectionString("Redis");
+                options.InstanceName = "BankingSystem_";
+            });
 
 
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

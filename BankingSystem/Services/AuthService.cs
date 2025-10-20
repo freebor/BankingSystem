@@ -41,8 +41,9 @@ namespace BankingSystem.Services
 
         public async Task<string> GenerateJwtTokenAsync(User user)
         {
-            var key = Environment.GetEnvironmentVariable("Jwt__SecretKey");
-            if(key == null) throw new Exception("JWT Secret Key not configured");
+            var key = _config["Jwt:Key"]
+                ?? Environment.GetEnvironmentVariable("Jwt__SecretKey")
+                ?? throw new Exception("JWT Secret Key not configured");
 
             var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
             var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);

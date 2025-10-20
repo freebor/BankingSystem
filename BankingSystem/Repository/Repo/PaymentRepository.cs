@@ -51,7 +51,7 @@ namespace BankingSystem.Repository.Repo
         public async Task UpdateStatusAsync(Guid paymentId, string status)
         {
             var sql = "UPDATE Payments SET Status = @Status WHERE Id = @Id";
-            await _db.ExecuteAsync(sql, new { PaymentId = paymentId, Status = status });
+            await _db.ExecuteAsync(sql, new { Id = paymentId, Status = status });
         }
     }
 }
