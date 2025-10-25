@@ -9,6 +9,7 @@ using System.Text;
 using System.Data;
 using Microsoft.OpenApi.Models;
 using BankingSystem.RBAC;
+using Microsoft.AspNetCore.HttpOverrides;
 
 namespace BankingSystem
 {
@@ -17,6 +18,10 @@ namespace BankingSystem
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // Bind to the port provided by the hosting environment (Render sets PORT)
+            var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
+            builder.WebHost.UseUrls($"http://*:{port}");
 
             // 1. Add Controllers
             builder.Services.AddControllers();
@@ -56,7 +61,7 @@ namespace BankingSystem
             {
                 options.RequireHttpsMetadata = false;
                 options.SaveToken = true;
-                 options.TokenValidationParameters = new TokenValidationParameters
+                options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuer = true,
                     ValidateAudience = true,
@@ -75,6 +80,17 @@ namespace BankingSystem
             {
                 options.Configuration = builder.Configuration.GetConnectionString("Redis");
                 options.InstanceName = "BankingSystem_";
+            });
+
+            // When running behind a proxy/load-balancer (Render), forward the original
+            // scheme so middleware like HTTPS redirection can be aware of the original request.
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                // Clear the known networks/proxies so forwarded headers are accepted from the proxy
+                // (on some hosts you may want to restrict this).
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
             });
 
 
@@ -129,11 +145,22 @@ namespace BankingSystem
                 app.UseSwaggerUI();
             }
 
-            app.UseHttpsRedirection();
 
-            app.UseAuthorization();
+            // Apply forwarded headers (should be before authentication/https redirection)
+            app.UseForwardedHeaders();
 
+            // Only use HTTPS redirection in Development or when an HTTPS port is explicitly configured.
+            // Render terminates TLS at the load balancer and forwards to the container over HTTP,
+            // so calling HTTPS redirection in Production without proper configuration can raise the
+            // "Failed to determine the https port for redirect" warning. Keep it off in Production.
+            if (app.Environment.IsDevelopment() || !string.IsNullOrEmpty(app.Configuration["ASPNETCORE_HTTPS_PORT"]))
+            {
+                app.UseHttpsRedirection();
+            }
 
+            // Add a simple root endpoint to avoid 404 at '/'. This makes a basic health/check response
+            // and helps when visiting the site URL in a browser.
+            app.MapGet("/", () => Results.Text("Banking System API is running."));
 
             app.MapControllers();
 
