@@ -1,16 +1,12 @@
-﻿using Xunit;
-using Moq;
+﻿using BankingSystem.Models.Entity;
 using BankingSystem.Repository.Interface;
-using BankingSystem.Models.Entity;
-using BankingSystem.Services.Interface;
-using BankingSystem.Repository.Repo;
 using BankingSystem.Services;
 using Microsoft.Extensions.Caching.Distributed;
-using System.Data;
+using Moq;
 using System.Text;
 using System.Text.Json;
 
-namespace BankingSystem.Tests
+namespace BankingSystem.Test
 {
     public class AccountServiceTests
     {
@@ -445,5 +441,4 @@ namespace BankingSystem.Tests
 
         #endregion
     }
-
 }

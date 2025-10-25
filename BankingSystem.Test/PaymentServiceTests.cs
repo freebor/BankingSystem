@@ -1,12 +1,13 @@
-﻿using Moq;
+﻿using BankingSystem.Models.Entity;
 using BankingSystem.Repository.Interface;
-using BankingSystem.Models.Entity;
 using BankingSystem.Services;
+using BankingSystem.Services.Interface;
 using Microsoft.Extensions.Caching.Distributed;
+using Moq;
 using System.Text;
 using System.Text.Json;
 
-namespace BankingXunit.Test
+namespace BankingSystem.Test
 {
     public class PaymentServiceTests
     {
@@ -451,6 +452,4 @@ namespace BankingXunit.Test
 
         #endregion
     }
-
-
 }

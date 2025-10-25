@@ -10,6 +10,6 @@ namespace BankingSystem.Services.Interface
         Task<User?> GetUserByEmailAsync(string email);
         Task<IEnumerable<User>> GetAllUserAsync();
         Task<bool> ValidateCredentialsAsync(string email, string password);
-        object HashPassword(string password);
+        string HashPassword(string password);
     }
 }

@@ -35,7 +35,7 @@ namespace BankingSystem.Services
                 Id = Guid.NewGuid(),
                 UserName = request.UserName,
                 Email = request.Email,
-                PasswordHash = hashPassword.ToString(),
+                PasswordHash = hashPassword,
                 CreatedAt = DateTime.UtcNow,
             };
 
@@ -113,10 +113,10 @@ namespace BankingSystem.Services
             var user = await _userRepo.GetByEmailAsync(email);
             if (user == null) return false;
 
-            return user.PasswordHash == HashPassword(password);
+            return user.PasswordHash == HashPassword(password).ToString();
         }
 
-        public object HashPassword(string password)
+        public string HashPassword(string password)
         {
             using var sha256 = SHA256.Create();
             var bytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
